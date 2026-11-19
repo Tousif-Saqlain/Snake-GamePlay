@@ -1,0 +1,384 @@
+:root {
+    --bg-dark: #070b14;
+    --bg-panel: rgba(17, 25, 40, 0.78);
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent: #10b981;
+    --accent-glow: rgba(16, 185, 129, 0.45);
+    --snake-body: #059669;
+    --food-color: #f43f5e;
+    --food-glow: rgba(244, 63, 94, 0.65);
+    --board-bg: #0c1322;
+    --grid-line: rgba(255, 255, 255, 0.035);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background: radial-gradient(circle at top, #13203b 0%, var(--bg-dark) 65%);
+    color: var(--text-main);
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    padding: 12px;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 460px;
+    height: 100%;
+    max-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Header */
+.game-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+}
+
+.brand h1 span {
+    color: var(--accent);
+}
+
+.brand p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.4px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid var(--border-glass);
+    background: var(--bg-panel);
+    color: var(--text-main);
+    font-size: 1.05rem;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: transform 0.15s ease, background 0.2s ease;
+    backdrop-filter: blur(10px);
+}
+
+.icon-btn:active {
+    transform: scale(0.92);
+}
+
+.icon-btn:hover {
+    background: rgba(30, 41, 59, 0.9);
+}
+
+/* Scoreboard */
+.stats-bar {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.stat-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-glass);
+    border-radius: 14px;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+.stat-card.highlight {
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.stat-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+.stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.stat-card.highlight .stat-value {
+    color: var(--accent);
+}
+
+/* Board */
+.board-wrapper {
+    position: relative;
+    width: min(92vw, 430px, 52dvh);
+    aspect-ratio: 1 / 1;
+    border-radius: 18px;
+    padding: 6px;
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.28), rgba(255, 255, 255, 0.05));
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+}
+
+#board {
+    width: 100%;
+    height: 100%;
+    background-color: var(--board-bg);
+    background-image:
+        linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: calc(100% / 18) calc(100% / 18);
+    border-radius: 13px;
+    display: grid;
+    grid-template-rows: repeat(18, 1fr);
+    grid-template-columns: repeat(18, 1fr);
+    overflow: hidden;
+    touch-action: none; /* Prevents page scroll while swiping */
+}
+
+/* Snake & Food */
+.head {
+    background: linear-gradient(135deg, #34d399, #10b981);
+    border-radius: 32%;
+    box-shadow: 0 0 12px var(--accent-glow);
+    position: relative;
+    z-index: 2;
+    transform: scale(1.06);
+}
+
+/* Eyes on snake head */
+.head::before,
+.head::after {
+    content: "";
+    position: absolute;
+    width: 22%;
+    height: 22%;
+    background: #06221a;
+    border-radius: 50%;
+    top: 24%;
+}
+.head::before { left: 20%; }
+.head::after { right: 20%; }
+
+.snake {
+    background: linear-gradient(135deg, #10b981, var(--snake-body));
+    border-radius: 28%;
+    margin: 1px;
+    box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.18);
+}
+
+.food {
+    background: radial-gradient(circle at 35% 35%, #fda4af, var(--food-color) 65%, #9f1239);
+    border-radius: 50%;
+    margin: 12%;
+    box-shadow: 0 0 14px var(--food-glow);
+    animation: pulseFood 1.2s infinite ease-in-out;
+}
+
+@keyframes pulseFood {
+    0%, 100% { transform: scale(0.92); }
+    50% { transform: scale(1.12); }
+}
+
+/* Overlay Modal */
+.overlay {
+    position: absolute;
+    inset: 6px;
+    border-radius: 13px;
+    background: rgba(7, 11, 20, 0.82);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 10;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.overlay-card {
+    width: 100%;
+    max-width: 290px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.overlay-card h2 {
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.overlay-card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.final-score {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-glass);
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.final-score span {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+}
+
+.final-score strong {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.8rem;
+    color: var(--accent);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.difficulty-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--border-glass);
+}
+
+.diff-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 8px 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.diff-btn.active {
+    background: var(--accent);
+    color: #042f2e;
+}
+
+.primary-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 13px 20px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #34d399, #10b981);
+    color: #042f2e;
+    cursor: pointer;
+    box-shadow: 0 8px 22px var(--accent-glow);
+    transition: transform 0.15s ease, filter 0.2s ease;
+}
+
+.primary-btn:hover {
+    filter: brightness(1.06);
+}
+
+.primary-btn:active {
+    transform: scale(0.96);
+}
+
+/* Mobile D-Pad */
+.controls-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 62px);
+    grid-template-rows: repeat(2, 56px);
+    gap: 8px;
+    justify-content: center;
+    margin-top: 2px;
+}
+
+.ctrl-btn {
+    border: 1px solid var(--border-glass);
+    background: var(--bg-panel);
+    color: var(--text-main);
+    font-size: 1.2rem;
+    border-radius: 14px;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s ease, background 0.15s ease;
+    touch-action: manipulation;
+}
+
+.ctrl-btn:active {
+    transform: scale(0.9);
+    background: var(--accent);
+    color: #042f2e;
+}
+
+.ctrl-btn.up    { grid-column: 2; grid-row: 1; }
+.ctrl-btn.left  { grid-column: 1; grid-row: 2; }
+.ctrl-btn.down  { grid-column: 2; grid-row: 2; }
+.ctrl-btn.right { grid-column: 3; grid-row: 2; }
+
+/* Desktop tweaks: larger board, hide D-pad on fine pointers (mouse/keyboard) */
+@media (min-width: 768px) and (pointer: fine) {
+    .board-wrapper {
+        width: min(72dvh, 450px);
+    }
+    .controls-pad {
+        display: none;
+    }
+}
+
+/* Compact phones */
+@media (max-height: 670px) {
+    .app-container { gap: 8px; }
+    .board-wrapper { width: min(86vw, 46dvh); }
+    .controls-pad {
+        grid-template-columns: repeat(3, 56px);
+        grid-template-rows: repeat(2, 48px);
+    }
+}
